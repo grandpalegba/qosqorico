@@ -1,0 +1,11 @@
+{
+  "name": "Favorite",
+  "type": "object",
+  "properties": {
+    "provider_id": { "type": "string", "description": "Provider ID" },
+    "provider_name": { "type": "string", "description": "Provider full name" },
+    "poster_url": { "type": "string", "description": "Provider poster URL" },
+    "series": { "type": "string", "description": "Provider series name" }
+  },
+  "required": ["provider_id", "provider_name"]
+}

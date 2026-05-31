@@ -1,0 +1,13 @@
+{
+ "name": "Message",
+ "type": "object",
+ "properties": {
+     "provider_id": { "type": "string", "description": "Provider this
+conversation belongs to" },
+     "sender_name": { "type": "string", "description": "Name of the sender" },
+     "content": { "type": "string", "description": "Message text" },
+     "is_provider": { "type": "boolean", "description": "True if sent by the
+provider", "default": false }
+ },
+ "required": ["provider_id", "sender_name", "content"]
+}

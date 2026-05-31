@@ -1,0 +1,63 @@
+{
+ "name": "Reservation",
+ "type": "object",
+ "properties": {
+     "guest_name": {
+         "type": "string",
+         "description": "Full name of the guest"
+     },
+"email": {
+ "type": "string",
+ "description": "Guest email for confirmation"
+},
+"phone": {
+ "type": "string",
+ "description": "Guest phone number"
+},
+"date": {
+ "type": "string",
+ "format": "date",
+ "description": "Reservation date"
+},
+"time_slot": {
+ "type": "string",
+ "description": "Selected time slot e.g. 19:00"
+},
+"service": {
+ "type": "string",
+ "enum": [
+     "Dining Experience",
+     "Chef's Table",
+     "Private Event",
+     "Tasting Menu"
+ ],
+ "description": "Type of dining experience"
+},
+"party_size": {
+ "type": "number",
+ "description": "Number of guests"
+},
+"special_requests": {
+ "type": "string",
+ "description": "Any special requests or notes"
+},
+"status": {
+ "type": "string",
+ "enum": [
+     "pending",
+     "confirmed",
+     "cancelled"
+          ],
+          "default": "confirmed",
+          "description": "Reservation status"
+      }
+ },
+ "required": [
+      "guest_name",
+      "email",
+      "date",
+      "time_slot",
+      "service",
+      "party_size"
+ ]
+}

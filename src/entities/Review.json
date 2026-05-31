@@ -1,0 +1,17 @@
+{
+  "name": "Review",
+  "type": "object",
+  "properties": {
+    "provider_id": { "type": "string", "description": "Provider ID" },
+    "reviewer_name": { "type": "string", "description": "Name of the reviewer" },
+    "comment_narrative": { "type": "string", "description": "Comment on the narrative (video)" },
+    "comment_merchant": { "type": "string", "description": "Comment on the service/product" },
+    "authenticity": { "type": "number", "description": "Narrative: sincerity and truthfulness of the story (0-100)" },
+    "originality": { "type": "number", "description": "Narrative: uniqueness of perspective vs tourist clichés (0-100)" },
+    "impact": { "type": "number", "description": "Narrative: emotional/educational power of the message (0-100)" },
+    "human_quality": { "type": "number", "description": "Merchant: warmth, kindness, fluidity of the exchange (0-100)" },
+    "offer_quality": { "type": "number", "description": "Merchant: rigor, finish, promise delivery, technical mastery (0-100)" },
+    "utility": { "type": "number", "description": "Merchant: concrete value, usefulness of the product/service (0-100)" }
+  },
+  "required": ["provider_id", "reviewer_name", "authenticity", "originality", "impact", "human_quality", "offer_quality", "utility"]
+}

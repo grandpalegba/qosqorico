@@ -1,0 +1,65 @@
+{
+ "name": "Order",
+ "type": "object",
+ "properties": {
+    "customer_name": {
+      "type": "string",
+      "description": "Customer name"
+    },
+    "email": {
+      "type": "string",
+      "description": "Customer email"
+    },
+    "items": {
+      "type": "array",
+      "description": "Ordered items with customizations",
+      "items": {
+           "type": "object",
+           "properties": {
+            "item_id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "price": {
+              "type": "number"
+            },
+            "dietary": {
+              "type": "array",
+              "items": {
+                  "type": "string"
+              }
+            },
+            "special_instructions": {
+              "type": "string"
+            },
+                 "quantity": {
+                     "type": "number"
+                 }
+             }
+         }
+     },
+     "total": {
+         "type": "number",
+         "description": "Total order price"
+     },
+     "status": {
+         "type": "string",
+         "enum": [
+             "cart",
+             "submitted",
+             "preparing",
+             "ready"
+         ],
+         "default": "cart"
+     },
+     "notes": {
+         "type": "string",
+         "description": "General order notes"
+     }
+ },
+ "required": [
+     "items"
+ ]
+}

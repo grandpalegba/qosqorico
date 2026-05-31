@@ -1,0 +1,19 @@
+{
+ "name": "User",
+ "type": "object",
+ "properties": {
+     "role": {
+         "type": "string",
+         "enum": ["admin", "user", "explorador", "proveedor"],
+         "default": "explorador"
+     },
+     "referral_code": {
+         "type": "string",
+         "description": "Unique referral code for this user"
+     },
+     "referred_by": {
+         "type": "string",
+         "description": "Referral code used during registration"
+     }
+ }
+}
