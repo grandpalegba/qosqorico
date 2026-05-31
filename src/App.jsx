@@ -13,6 +13,7 @@ import ResetPassword from './pages/ResetPassword';
 import Home from './pages/Home';
 import Series from './pages/Series';
 import Profile from './pages/Profile';
+import ScrollToTop from './components/ScrollToTop';
 
 import Payment from './pages/Payment';
 import VideoPlayer from './pages/VideoPlayer';
@@ -84,6 +85,7 @@ function App() {
      <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
+            <ScrollToTop />
             <AuthenticatedApp />
         </Router>
         <Toaster />
