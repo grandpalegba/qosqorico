@@ -12,20 +12,17 @@ import { getProviderById } from "../lib/providers";
 import { useLang, T } from "../lib/LangContext";
 import Header from "../components/Header";
 
-
 const CRITERIA = [
   { key: "authenticity", labelEs: "Autenticidad", labelEn: "Authenticity", color: "#AD281F" },
   { key: "originality", labelEs: "Originalidad", labelEn: "Originality", color: "#C38322" },
   { key: "impact", labelEs: "Impacto", labelEn: "Impact", color: "#2A7A5A" },
 ];
 
-
 function seededNum(str, min, max) {
   let h = 0;
   for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) % 9973;
   return min + (h % (max - min));
 }
-
 
 function getProviderStats(provider) {
   const views = seededNum(provider.id + "views", 800, 12000);
@@ -36,7 +33,6 @@ function getProviderStats(provider) {
   }));
   return { views, ratings, avgScores };
 }
-
 
 function EpisodeCard({ episode, index, isActive, onClick }) {
   return (
@@ -69,7 +65,6 @@ function EpisodeCard({ episode, index, isActive, onClick }) {
     </button>
   );
 }
-
 
 function ServicePanel({ provider, open, onClose, t, navigate }) {
   const handleBook = (service) => {
@@ -132,11 +127,9 @@ function ServicePanel({ provider, open, onClose, t, navigate }) {
   );
 }
 
-
 export default function Profile() {
   const { providerId } = useParams();
   const navigate = useNavigate();
-
   const { lang } = useLang();
   const t = T[lang];
   const provider = getProviderById(providerId);
@@ -145,28 +138,23 @@ export default function Profile() {
   const [bookingOpen, setBookingOpen] = useState(false);
   const [msgOpen, setMsgOpen] = useState(false);
 
-
   if (!provider) {
     return <div className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground">Proveedor no encontrado.</p></div>;
   }
 
-
   const { views, ratings: ratingsCount, avgScores } = getProviderStats(provider);
   const criteriaLabel = (c) => lang === "en" ? c.labelEn : c.labelEs;
-
 
   const handleEpisodeClick = (index) => {
     setActiveEp(index);
     navigate(`/watch/${providerId}/${index}`);
   };
 
-
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main className="pt-14 pb-12">
         <div className="max-w-screen-lg mx-auto px-4 md:px-6">
-
 
           {/* Back button */}
           <button
@@ -175,7 +163,6 @@ export default function Profile() {
           >
             <ArrowLeft className="h-4 w-4" /> {t.back}
           </button>
-
 
           {/* Profile hero — large photo + info */}
           <div className="flex flex-col sm:flex-row gap-6 mb-8">
@@ -197,7 +184,6 @@ export default function Profile() {
               </div>
             </div>
 
-
             {/* Info column */}
             <div className="flex-1">
               <div className="flex items-start justify-between gap-2 mb-1">
@@ -217,7 +203,6 @@ export default function Profile() {
                 <span className="flex items-center gap-1"><Globe className="h-3 w-3" />{provider.languages.join(", ")}</span>
               </div>
 
-
               {/* Mini dashboard */}
               <div className="flex gap-3 mb-4">
                 <div className="flex-1 bg-card border border-border rounded-xl p-3 text-center">
@@ -232,10 +217,9 @@ export default function Profile() {
                 </div>
                 <div className="flex-1 bg-card border border-border rounded-xl p-3 text-center">
                   <p className="text-lg font-bold text-foreground">{Math.round(avgScores.reduce((a, c) => a + c.avg, 0) / 3)}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Score</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{lang === "es" ? "Score" : "Score"}</p>
                 </div>
               </div>
-
 
               {/* 3 colored rating bars */}
               <div className="space-y-2.5">
@@ -257,10 +241,8 @@ export default function Profile() {
             </div>
           </div>
 
-
           {/* Bio */}
           <p className="text-sm text-muted-foreground leading-relaxed mb-8 max-w-2xl">{provider.bio}</p>
-
 
           {/* Episodes */}
           <div>
@@ -284,7 +266,6 @@ export default function Profile() {
             </Button>
           </div>
 
-
           {/* Availability Calendar */}
           <div className="mb-10 border border-border rounded-2xl p-4 bg-card max-w-sm">
             <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3 flex items-center gap-1.5">
@@ -293,11 +274,9 @@ export default function Profile() {
             <AvailabilityCalendar provider={provider} />
           </div>
 
-
           <ProviderDashboard provider={provider} />
         </div>
       </main>
-
 
       <ServicePanel provider={provider} open={panelOpen} onClose={() => setPanelOpen(false)} t={t} navigate={navigate} />
       <BookingModal provider={provider} open={bookingOpen} onClose={() => setBookingOpen(false)} />
