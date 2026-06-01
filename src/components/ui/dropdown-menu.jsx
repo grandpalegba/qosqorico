@@ -145,8 +145,7 @@ className)}
 DropdownMenuLabel.displayName = DropdownMenuPrimitive.Label.displayName
 
 
-const DropdownMenuSeparator = React.forwardRef(({ className, ...props }, ref)
-=> (
+const DropdownMenuSeparator = React.forwardRef(({ className, ...props }, ref) => (
 <DropdownMenuPrimitive.Separator
      ref={ref}
      className={cn("-mx-1 my-1 h-px bg-muted", className)}
@@ -186,3 +185,4 @@ DropdownMenuGroup,
  DropdownMenuSubContent,
  DropdownMenuSubTrigger,
  DropdownMenuRadioGroup,
+}
