@@ -405,7 +405,6 @@ const SUYUS_BASE = [
 
 
 export const SUYUS_WITH_DEMO = [
- ...SUYUS_BASE,
  {
    id: "demo",
    name: "Demo Qosqorico",
@@ -413,39 +412,16 @@ export const SUYUS_WITH_DEMO = [
    color: "#6D28D9",
    series: [
      {
-       name: "Demo: Hilos del Inca",
-       synopsis: "Profil de démonstration — Tejedora ancestral.",
-       synopsis_larga: "Ce profil de démonstration vous permet de tester l'expérience complète de Qosqorico : réservation, messagerie et évaluation. María Mamani est une tejedora de Chinchero qui partage l'art du telar ancestral.",
-       image: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=600&h=900&fit=crop",
-       keywords: ["Démo", "Tejido", "Alpaca", "Chinchero", "Artesanía"],
-       is_demo: true
-     },
-     {
-       name: "Demo: El Ombligo del Mundo",
-       synopsis: "Profil de démonstration — Arqueólogo inca.",
-       synopsis_larga: "Ce profil de démonstration vous permet de tester l'expérience complète de Qosqorico. Carlos Apaza est un archéologue qui transforme chaque visite de sites incas en une histoire inoubliable.",
+       name: "Demo Qosqorico",
+       synopsis: "Profils de démonstration pour tester la plateforme.",
+       synopsis_larga: "Découvrez l'expérience complète de Qosqorico : explorez les vidéos, simulez des réservations, envoyez des messages et laissez des évaluations sur ces profils de test.",
        image: "https://images.unsplash.com/photo-1526392060635-9d6019884377?w=600&h=900&fit=crop",
-       keywords: ["Démo", "Arqueología", "Inca", "Historia", "Cusco"],
-       is_demo: true
-     },
-     {
-       name: "Demo: Frutos de Altura",
-       synopsis: "Profil de démonstration — Cocinera andina.",
-       synopsis_larga: "Ce profil de démonstration vous permet de tester l'expérience complète de Qosqorico. Lucía Cusihuamán transforme les ingrédients du marché San Pedro en expériences culinaires uniques.",
-       image: "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=600&h=900&fit=crop",
-       keywords: ["Démo", "Cocina", "Gastronomía", "Andina", "Superfoods"],
-       is_demo: true
-     },
-     {
-       name: "Demo: Ecos del Viento",
-       synopsis: "Profil de démonstration — Músico sagrado.",
-       synopsis_larga: "Ce profil de démonstration vous permet de tester l'expérience complète de Qosqorico. Diego Quispe joue de la quena et du charango depuis l'âge de 8 ans. Ses sessions sont des cérémonies vibratoires.",
-       image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&h=900&fit=crop",
-       keywords: ["Démo", "Música", "Sound Healing", "Quena", "Charango"],
+       keywords: ["Démo", "Test", "Expérience", "Cusco"],
        is_demo: true
      }
    ]
- }
+ },
+ ...SUYUS_BASE
 ];
 
 // Garder SUYUS comme export principal (avec le Suyu Demo inclus)

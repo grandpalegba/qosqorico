@@ -27,29 +27,27 @@ export default function Header() {
         {/* Right Side: Actions */}
         <div className="flex items-center gap-3 sm:gap-5">
              
-          {/* Language Toggle */}
-          <div className="hidden sm:flex items-center border border-border rounded-full overflow-hidden text-xs font-semibold">
-            <button
-                onClick={() => setLang("es")}
-                className={`px-2.5 py-1.5 transition-colors ${lang === "es" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
-            >
-                ES
-            </button>
-            <button
-                onClick={() => setLang("en")}
-                className={`px-2.5 py-1.5 transition-colors ${lang === "en" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
-            >
-                EN
-            </button>
-          </div>
+          {/* Language Toggle (only if logged out) */}
+          {!isAuthenticated && (
+            <div className="hidden sm:flex items-center border border-border rounded-full overflow-hidden text-xs font-semibold">
+              <button
+                  onClick={() => setLang("es")}
+                  className={`px-2.5 py-1.5 transition-colors ${lang === "es" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
+              >
+                  ES
+              </button>
+              <button
+                  onClick={() => setLang("en")}
+                  className={`px-2.5 py-1.5 transition-colors ${lang === "en" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
+              >
+                  EN
+              </button>
+            </div>
+          )}
 
           {!isAuthenticated ? (
             <>
-              {/* Logged Out State */}
-              <Link to="/register" className="hidden md:block text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">
-                {lang === "es" ? "Devenir Prestataire" : "Become a Provider"}
-              </Link>
-              
+              {/* Logged Out State - No Devenir Prestataire */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="rounded-full flex items-center gap-2 px-3 py-5 hover:shadow-md transition-all border-border/60">
@@ -67,33 +65,21 @@ export default function Header() {
                     {t.login}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/register")}>
-                    {lang === "es" ? "Proposer ses services" : "Offer your services"}
-                  </DropdownMenuItem>
                   <DropdownMenuItem className="cursor-pointer text-muted-foreground">
-                    {lang === "es" ? "Centre d'aide" : "Help Center"}
+                    {lang === "es" ? "Centro de ayuda" : "Help Center"}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </>
           ) : (
             <>
-              {/* Logged In State */}
+              {/* Logged In State — Show Participate & Propose links, hide icons */}
               <div className="hidden md:flex items-center gap-5 mr-2">
-                <button className="text-muted-foreground hover:text-foreground transition-colors">
-                  <Bell className="h-5 w-5" />
-                </button>
-                <button className="text-muted-foreground hover:text-foreground transition-colors">
-                  <Mail className="h-5 w-5" />
-                </button>
-                <button className="text-muted-foreground hover:text-foreground transition-colors">
-                  <Heart className="h-5 w-5" />
-                </button>
-                <Link to="/my-reservations" className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">
-                  {lang === "es" ? "Mis Reservas" : "Orders"}
+                <Link to="/create-provider-profile" className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors">
+                  {t.participateSeries}
                 </Link>
-                <Link to="/create-provider-profile" className="text-sm font-bold text-primary hover:text-primary/80 transition-colors">
-                  {lang === "es" ? "Devenir Prestataire" : "Become Provider"}
+                <Link to="/create-provider-profile" className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors">
+                  {t.proposeService}
                 </Link>
               </div>
 
@@ -113,35 +99,64 @@ export default function Header() {
                 <DropdownMenuContent align="end" className="w-60 mt-2 rounded-xl">
                   <div className="flex flex-col space-y-1 p-2">
                     <p className="text-sm font-medium leading-none truncate">{user?.email}</p>
-                    <p className="text-xs text-muted-foreground capitalize">{isProvider ? "Provider" : "Explorer"}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{lang === "es" ? "Explorador / Prestario" : "Explorer / Provider"}</p>
                   </div>
                   <DropdownMenuSeparator />
                   
-                  {/* Mobile-only visible quick actions */}
-                  <div className="md:hidden">
-                    <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/my-reservations")}>
-                      <CalendarDays className="mr-2 h-4 w-4" />
-                      <span>{lang === "es" ? "Mis Reservas" : "Orders"}</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer">
-                      <Heart className="mr-2 h-4 w-4" />
-                      <span>{lang === "es" ? "Favoritos" : "Favorites"}</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                  </div>
-
-                  <DropdownMenuItem className="cursor-pointer">
+                  {/* Dropdown Items in priority order */}
+                  <DropdownMenuItem className="cursor-pointer font-semibold" onClick={() => navigate("/profile")}>
                     <UserCircle className="mr-2 h-4 w-4" />
-                    <span>{lang === "es" ? "Perfil" : "Profile"}</span>
+                    <span>{t.profile}</span>
                   </DropdownMenuItem>
+                  
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/my-reservations")}>
+                    <CalendarDays className="mr-2 h-4 w-4" />
+                    <span>{t.myReservations}</span>
+                  </DropdownMenuItem>
+
                   <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/settings")}>
                     <Settings className="mr-2 h-4 w-4" />
-                    <span>{lang === "es" ? "Configuración" : "Settings"}</span>
+                    <span>{t.settings}</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer">
-                    <HelpCircle className="mr-2 h-4 w-4" />
-                    <span>{lang === "es" ? "Ayuda" : "Help"}</span>
+
+                  <DropdownMenuSeparator />
+
+                  {/* Logged-in gated icons now as menu options */}
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/profile?tab=favorites")}>
+                    <Heart className="mr-2 h-4 w-4" />
+                    <span>{lang === "es" ? "Favoritos" : "Favorites"}</span>
                   </DropdownMenuItem>
+
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/profile?tab=messages")}>
+                    <Mail className="mr-2 h-4 w-4" />
+                    <span>{lang === "es" ? "Mensajes" : "Messages"}</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/profile?tab=notifications")}>
+                    <Bell className="mr-2 h-4 w-4" />
+                    <span>{lang === "es" ? "Notificaciones" : "Notifications"}</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  {/* Language Toggle inside Profile Menu when connected */}
+                  <div className="flex items-center justify-between px-2.5 py-1.5 text-[11px] font-semibold text-muted-foreground">
+                    <span>{lang === "es" ? "Idioma" : "Language"}</span>
+                    <div className="flex items-center border border-border rounded-full overflow-hidden text-[10px]">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setLang("es"); }}
+                        className={`px-2 py-1 transition-colors ${lang === "es" ? "bg-primary text-primary-foreground font-bold" : "hover:bg-muted"}`}
+                      >
+                        ES
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setLang("en"); }}
+                        className={`px-2 py-1 transition-colors ${lang === "en" ? "bg-primary text-primary-foreground font-bold" : "hover:bg-muted"}`}
+                      >
+                        EN
+                      </button>
+                    </div>
+                  </div>
                   
                   <DropdownMenuSeparator />
                   <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive" onClick={() => logout()}>
@@ -156,5 +171,5 @@ export default function Header() {
         </div>
       </div>
     </header>
- );
+  );
 }

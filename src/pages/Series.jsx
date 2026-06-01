@@ -19,6 +19,7 @@ export default function Series() {
   const { lang } = useLang();
   const t = T[lang];
   const decoded = decodeURIComponent(seriesName);
+  const isDemoSeries = decoded === "Demo Qosqorico";
 
   const suyu = SUYUS.find((s) => s.series.some((sr) => sr.name === decoded));
   const series = suyu?.series.find((sr) => sr.name === decoded);
@@ -118,13 +119,15 @@ export default function Series() {
           <div className="mt-10">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t.protagonists}</h2>
-              <Link
-                to="/create-provider-profile"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
-              >
-                <PlusCircle className="h-3.5 w-3.5" />
-                {lang === "es" ? "Proponer esta experiencia" : "Offer this experience"}
-              </Link>
+              {!isDemoSeries && (
+                <Link
+                  to="/create-provider-profile"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+                >
+                  <PlusCircle className="h-3.5 w-3.5" />
+                  {lang === "es" ? "Proponer esta experiencia" : "Offer this experience"}
+                </Link>
+              )}
             </div>
 
             {loadingProviders ? (

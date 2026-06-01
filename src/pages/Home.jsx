@@ -2,7 +2,6 @@ import { useState } from "react";
 import Header from "../components/Header";
 import SeriesRow from "../components/SeriesRow";
 import SearchBar from "../components/SearchBar";
-import ProvidersMap from "../components/ProvidersMap";
 import CriteriaFilter from "../components/CriteriaFilter";
 import { SUYUS } from "../lib/data";
 import { useLang, T } from "../lib/LangContext";
@@ -146,9 +145,6 @@ return (
         {filteredSuyus.map((suyu) => (
           <SeriesRow key={suyu.id} suyu={suyu} />
         ))}
-
-
-        {!searchQuery && <ProvidersMap />}
       </main>
      </div>
  );
