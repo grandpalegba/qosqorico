@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Play, ThumbsUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-import { getProviderById } from "../lib/providers";
+import { useProvider } from "../hooks/useProviders";
 import Header from "../components/Header";
 import { useLang, T } from "../lib/LangContext";
 
@@ -54,7 +54,7 @@ const t = T[lang];
 const epIdx = parseInt(episodeIndex) || 0;
 
 
-const provider = getProviderById(providerId);
+const { data: provider, isLoading } = useProvider(providerId);
 const episode = provider?.episodes?.[epIdx];
 
 
@@ -80,6 +80,15 @@ JSON.stringify(ratings));
 const updateRating = (key, val) => {
     setRatings(r => ({ ...r, [key]: parseInt(val) }));
 };
+
+
+if (isLoading) {
+    return (
+      <div className="min-h-screen bg-foreground text-white flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-white/20 border-t-white rounded-full animate-spin" />
+      </div>
+    );
+}
 
 
 if (!provider || !episode) {

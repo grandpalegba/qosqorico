@@ -4,11 +4,14 @@ import BookingModal from "../components/BookingModal";
 import ProviderDashboard from "../components/ProviderDashboard";
 import FavoriteButton from "../components/FavoriteButton";
 import MessagingModal from "../components/MessagingModal";
+import ReviewModal from "../components/ReviewModal";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, ShoppingBag, MapPin, Globe, Clock, X, Eye, BarChart2, MessageCircle } from "lucide-react";
+import { ArrowLeft, ShoppingBag, MapPin, Globe, Clock, X, Eye, BarChart2, MessageCircle, Star, Lock, FlaskConical } from "lucide-react";
 import { Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getProviderById } from "../lib/providers";
+import { useProvider } from "../hooks/useProviders";
+import { useProviderReviews } from "../hooks/useReviews";
+import { useAuth } from "../lib/AuthContext";
 import { useLang, T } from "../lib/LangContext";
 import Header from "../components/Header";
 
@@ -17,22 +20,6 @@ const CRITERIA = [
   { key: "originality", labelEs: "Originalidad", labelEn: "Originality", color: "#C38322" },
   { key: "impact", labelEs: "Impacto", labelEn: "Impact", color: "#2A7A5A" },
 ];
-
-function seededNum(str, min, max) {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) % 9973;
-  return min + (h % (max - min));
-}
-
-function getProviderStats(provider) {
-  const views = seededNum(provider.id + "views", 800, 12000);
-  const ratings = seededNum(provider.id + "ratings", 20, 400);
-  const avgScores = CRITERIA.map(c => ({
-    ...c,
-    avg: seededNum(provider.id + c.key, 62, 97)
-  }));
-  return { views, ratings, avgScores };
-}
 
 function EpisodeCard({ episode, index, isActive, onClick }) {
   return (
@@ -132,18 +119,55 @@ export default function Profile() {
   const navigate = useNavigate();
   const { lang } = useLang();
   const t = T[lang];
-  const provider = getProviderById(providerId);
+  const { isAuthenticated } = useAuth();
+
+  const { data: provider, isLoading, error: providerError } = useProvider(providerId);
+  const { data: reviewData } = useProviderReviews(providerId);
+
   const [activeEp, setActiveEp] = useState(0);
   const [panelOpen, setPanelOpen] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [msgOpen, setMsgOpen] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
 
-  if (!provider) {
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (providerError || !provider) {
     return <div className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground">Proveedor no encontrado.</p></div>;
   }
 
-  const { views, ratings: ratingsCount, avgScores } = getProviderStats(provider);
+  // Normalize field names (real DB uses display_name, demo uses both)
+  const providerName = provider.display_name || provider.full_name || provider.name;
+  const providerPoster = provider.poster_url;
+  const providerLanguages = provider.languages || [];
+  const providerLocation = provider.location;
+  const providerBio = provider.bio;
+  const providerTagline = provider.tagline;
+  const providerEpisodes = provider.episodes || [];
+  const providerServices = provider.services || [];
+  const isDemo = provider.is_demo;
+
+  // Build avgScores from real reviews or show empty
+  const avgScores = reviewData?.averages
+    ? CRITERIA.map(c => ({ ...c, avg: reviewData.averages[c.key] }))
+    : null;
+  const ratingsCount = reviewData?.count || 0;
+
   const criteriaLabel = (c) => lang === "en" ? c.labelEn : c.labelEs;
+
+  const handleContactGated = (action) => {
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+    action();
+  };
 
   const handleEpisodeClick = (index) => {
     setActiveEp(index);
@@ -164,104 +188,131 @@ export default function Profile() {
             <ArrowLeft className="h-4 w-4" /> {t.back}
           </button>
 
+          {/* Demo badge */}
+          {isDemo && (
+            <div className="mb-4 inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-violet-100 text-violet-700 border border-violet-200">
+              <FlaskConical className="h-3.5 w-3.5" />
+              {lang === "es" ? "Perfil de demostración" : "Demo profile"}
+            </div>
+          )}
+
           {/* Profile hero — large photo + info */}
           <div className="flex flex-col sm:flex-row gap-6 mb-8">
             {/* Large profile photo */}
             <div className="flex-shrink-0 w-36 sm:w-44 rounded-2xl overflow-hidden shadow-xl border border-border relative" style={{ aspectRatio: "3/4" }}>
               <img
-                src={provider.poster_url}
-                alt={provider.full_name}
+                src={providerPoster}
+                alt={providerName}
                 className="absolute inset-0 w-full h-full object-cover object-top"
                 onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&h=900&fit=crop"; }}
               />
-              {/* Score overlay at bottom */}
-              <div className="absolute bottom-3 right-3 flex flex-col items-end gap-1">
-                {avgScores.map((c) => (
-                  <span key={c.key} className="text-xl font-black leading-none" style={{ color: c.color, textShadow: "0 1px 6px rgba(0,0,0,0.9)" }}>
-                    {c.avg}
-                  </span>
-                ))}
-              </div>
+              {/* Score overlay — only if real reviews exist */}
+              {avgScores && (
+                <div className="absolute bottom-3 right-3 flex flex-col items-end gap-1">
+                  {avgScores.map((c) => (
+                    <span key={c.key} className="text-xl font-black leading-none" style={{ color: c.color, textShadow: "0 1px 6px rgba(0,0,0,0.9)" }}>
+                      {c.avg}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Info column */}
             <div className="flex-1">
               <div className="flex items-start justify-between gap-2 mb-1">
                 <div className="flex items-center gap-2">
-                  <h1 className="text-2xl md:text-3xl font-bold text-foreground leading-tight">{provider.full_name}</h1>
+                  <h1 className="text-2xl md:text-3xl font-bold text-foreground leading-tight">{providerName}</h1>
                   <FavoriteButton provider={provider} />
                 </div>
-                <Button onClick={() => setPanelOpen(true)} className="flex-shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 gap-1.5" size="sm">
+                <Button onClick={() => handleContactGated(() => setPanelOpen(true))} className="flex-shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 gap-1.5" size="sm">
                   <ShoppingBag className="h-4 w-4" />
                   <span>{t.services}</span>
                 </Button>
               </div>
 
-              <p className="text-sm text-muted-foreground mb-1">{provider.tagline}</p>
+              <p className="text-sm text-muted-foreground mb-1">{providerTagline}</p>
               <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground mb-4">
-                <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{provider.location}</span>
-                <span className="flex items-center gap-1"><Globe className="h-3 w-3" />{provider.languages.join(", ")}</span>
+                {providerLocation && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{providerLocation}</span>}
+                {providerLanguages.length > 0 && <span className="flex items-center gap-1"><Globe className="h-3 w-3" />{providerLanguages.join(", ")}</span>}
               </div>
 
               {/* Mini dashboard */}
               <div className="flex gap-3 mb-4">
                 <div className="flex-1 bg-card border border-border rounded-xl p-3 text-center">
-                  <Eye className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
-                  <p className="text-lg font-bold text-foreground">{views.toLocaleString()}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{lang === "es" ? "Vistas" : "Views"}</p>
-                </div>
-                <div className="flex-1 bg-card border border-border rounded-xl p-3 text-center">
                   <BarChart2 className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
                   <p className="text-lg font-bold text-foreground">{ratingsCount}</p>
                   <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{lang === "es" ? "Evaluaciones" : "Ratings"}</p>
                 </div>
-                <div className="flex-1 bg-card border border-border rounded-xl p-3 text-center">
-                  <p className="text-lg font-bold text-foreground">{Math.round(avgScores.reduce((a, c) => a + c.avg, 0) / 3)}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{lang === "es" ? "Score" : "Score"}</p>
-                </div>
+                {avgScores && (
+                  <div className="flex-1 bg-card border border-border rounded-xl p-3 text-center">
+                    <Star className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
+                    <p className="text-lg font-bold text-foreground">{Math.round(avgScores.reduce((a, c) => a + c.avg, 0) / 3)}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Score</p>
+                  </div>
+                )}
               </div>
 
-              {/* 3 colored rating bars */}
-              <div className="space-y-2.5">
-                {avgScores.map((c) => (
-                  <div key={c.key}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-semibold text-muted-foreground">{criteriaLabel(c)}</span>
-                      <span className="text-xs font-bold" style={{ color: c.color }}>{c.avg}/100</span>
+              {/* Rating bars or empty state */}
+              {avgScores ? (
+                <div className="space-y-2.5">
+                  {avgScores.map((c) => (
+                    <div key={c.key}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-semibold text-muted-foreground">{criteriaLabel(c)}</span>
+                        <span className="text-xs font-bold" style={{ color: c.color }}>{c.avg}/100</span>
+                      </div>
+                      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                        <div className="h-full rounded-full transition-all duration-700" style={{ width: `${c.avg}%`, backgroundColor: c.color }} />
+                      </div>
                     </div>
-                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all duration-700"
-                        style={{ width: `${c.avg}%`, backgroundColor: c.color }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Star className="h-3.5 w-3.5" />
+                  {lang === "es" ? "Aún sin evaluaciones — ¡sé el primero!" : "No reviews yet — be the first!"}
+                </div>
+              )}
+
+              {/* Leave a review button */}
+              <button
+                onClick={() => handleContactGated(() => setReviewOpen(true))}
+                className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+              >
+                <Star className="h-3.5 w-3.5" />
+                {!isAuthenticated
+                  ? (lang === "es" ? "Inicia sesión para evaluar" : "Log in to review")
+                  : (lang === "es" ? "Dejar una evaluación" : "Leave a review")}
+              </button>
             </div>
           </div>
 
           {/* Bio */}
-          <p className="text-sm text-muted-foreground leading-relaxed mb-8 max-w-2xl">{provider.bio}</p>
+          <p className="text-sm text-muted-foreground leading-relaxed mb-8 max-w-2xl">{providerBio}</p>
 
           {/* Episodes */}
-          <div>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">
-              {provider.episodes.length} {t.episodes}
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {provider.episodes.map((ep, i) => (
-                <EpisodeCard key={i} episode={ep} index={i} isActive={i === activeEp} onClick={handleEpisodeClick} />
-              ))}
+          {providerEpisodes.length > 0 && (
+            <div>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">
+                {providerEpisodes.length} {t.episodes}
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {providerEpisodes.map((ep, i) => (
+                  <EpisodeCard key={i} episode={ep} index={i} isActive={i === activeEp} onClick={handleEpisodeClick} />
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
+          {/* Contact actions — gated behind login */}
           <div className="mt-8 flex flex-col sm:flex-row gap-3 mb-10">
-            <Button onClick={() => setPanelOpen(true)} className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-8" size="lg">
+            <Button onClick={() => handleContactGated(() => setPanelOpen(true))} className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-8" size="lg">
+              {!isAuthenticated && <Lock className="h-4 w-4 mr-1.5" />}
               {t.bookView}
             </Button>
-            <Button variant="outline" size="lg" onClick={() => setMsgOpen(true)} className="w-full sm:w-auto font-semibold px-8 border-border text-foreground hover:bg-muted gap-2">
-              <MessageCircle className="h-4 w-4" />
+            <Button variant="outline" size="lg" onClick={() => handleContactGated(() => setMsgOpen(true))} className="w-full sm:w-auto font-semibold px-8 border-border text-foreground hover:bg-muted gap-2">
+              {!isAuthenticated ? <Lock className="h-4 w-4" /> : <MessageCircle className="h-4 w-4" />}
               {lang === "es" ? "Enviar Mensaje" : "Send Message"}
             </Button>
           </div>
@@ -278,9 +329,10 @@ export default function Profile() {
         </div>
       </main>
 
-      <ServicePanel provider={provider} open={panelOpen} onClose={() => setPanelOpen(false)} t={t} navigate={navigate} />
+      <ServicePanel provider={{ ...provider, full_name: providerName, languages: providerLanguages, location: providerLocation, bio: providerBio, services: providerServices }} open={panelOpen} onClose={() => setPanelOpen(false)} t={t} navigate={navigate} />
       <BookingModal provider={provider} open={bookingOpen} onClose={() => setBookingOpen(false)} />
       <MessagingModal provider={provider} open={msgOpen} onClose={() => setMsgOpen(false)} />
+      {reviewOpen && <ReviewModal provider={{ ...provider, display_name: providerName }} lang={lang} onClose={() => setReviewOpen(false)} />}
     </div>
   );
 }

@@ -21,6 +21,7 @@ import Reservations from './pages/Reservations';
 import Menu from './pages/Menu';
 import MyReservations from './pages/MyReservations';
 import Settings from './pages/Settings';
+import CreateProviderProfile from './pages/CreateProviderProfile';
 
 
 const AuthenticatedApp = () => {
@@ -56,6 +57,7 @@ return (
       <Route path="/menu" element={<Menu />} />
       <Route path="/my-reservations" element={<MyReservations />} />
       <Route path="/settings" element={<Settings />} />
+      <Route path="/create-provider-profile" element={<CreateProviderProfile />} />
       <Route path="*" element={<PageNotFound />} />
      </Routes>
  );

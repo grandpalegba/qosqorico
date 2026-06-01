@@ -1,4 +1,4 @@
-export const SUYUS = [
+const SUYUS_BASE = [
  {
      id: "centro",
      name: "El Centro",
@@ -404,8 +404,50 @@ export const SUYUS = [
 ];
 
 
-export const TREASURE_CARDS = [
- { title: "El Secreto de los Nudos", fact: "Los quipus incas contenían más información que un libro moderno. Se han encontrado quipus con más de 1,500 cuerdas que registraban censos completos del imperio.", reward: "10% de descuento en una Clase de Crêpes con Julien", rewardProvider: "Julien" },
- { title: "La Ciudad Puma", fact: "La planta urbana del Cusco inca fue diseñada con la forma de un puma. Sacsayhuamán es la cabeza y el Coricancha el corazón del felino sagrado.", reward: "Mate de coca artesanal gratis con la consulta del Dr. Mateo", rewardProvider: "Mateo" },
- { title: "Los Colores que Hablan", fact: "En los textiles andinos, cada color tiene un significado: el rojo representa la sangre de la tierra, el verde la Pachamama y el amarillo el oro del sol.", reward: "Mini textil de regalo con la Clase Magistral de María", rewardProvider: "María" }
-]
+export const SUYUS_WITH_DEMO = [
+ ...SUYUS_BASE,
+ {
+   id: "demo",
+   name: "Demo Qosqorico",
+   subtitle: "Tester l'expérience complète",
+   color: "#6D28D9",
+   series: [
+     {
+       name: "Demo: Hilos del Inca",
+       synopsis: "Profil de démonstration — Tejedora ancestral.",
+       synopsis_larga: "Ce profil de démonstration vous permet de tester l'expérience complète de Qosqorico : réservation, messagerie et évaluation. María Mamani est une tejedora de Chinchero qui partage l'art du telar ancestral.",
+       image: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=600&h=900&fit=crop",
+       keywords: ["Démo", "Tejido", "Alpaca", "Chinchero", "Artesanía"],
+       is_demo: true
+     },
+     {
+       name: "Demo: El Ombligo del Mundo",
+       synopsis: "Profil de démonstration — Arqueólogo inca.",
+       synopsis_larga: "Ce profil de démonstration vous permet de tester l'expérience complète de Qosqorico. Carlos Apaza est un archéologue qui transforme chaque visite de sites incas en une histoire inoubliable.",
+       image: "https://images.unsplash.com/photo-1526392060635-9d6019884377?w=600&h=900&fit=crop",
+       keywords: ["Démo", "Arqueología", "Inca", "Historia", "Cusco"],
+       is_demo: true
+     },
+     {
+       name: "Demo: Frutos de Altura",
+       synopsis: "Profil de démonstration — Cocinera andina.",
+       synopsis_larga: "Ce profil de démonstration vous permet de tester l'expérience complète de Qosqorico. Lucía Cusihuamán transforme les ingrédients du marché San Pedro en expériences culinaires uniques.",
+       image: "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=600&h=900&fit=crop",
+       keywords: ["Démo", "Cocina", "Gastronomía", "Andina", "Superfoods"],
+       is_demo: true
+     },
+     {
+       name: "Demo: Ecos del Viento",
+       synopsis: "Profil de démonstration — Músico sagrado.",
+       synopsis_larga: "Ce profil de démonstration vous permet de tester l'expérience complète de Qosqorico. Diego Quispe joue de la quena et du charango depuis l'âge de 8 ans. Ses sessions sont des cérémonies vibratoires.",
+       image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&h=900&fit=crop",
+       keywords: ["Démo", "Música", "Sound Healing", "Quena", "Charango"],
+       is_demo: true
+     }
+   ]
+ }
+];
+
+// Garder SUYUS comme export principal (avec le Suyu Demo inclus)
+export const SUYUS = SUYUS_WITH_DEMO;
+

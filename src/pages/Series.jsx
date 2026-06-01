@@ -1,32 +1,16 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, PlusCircle, FlaskConical } from "lucide-react";
 import Header from "../components/Header";
 import { SUYUS } from "../lib/data";
-import { getProvidersForSeries } from "../lib/providers";
+import { useProvidersForSeries } from "../hooks/useProviders";
+import { getQuestionsForSeries } from "../lib/providers";
 import { useLang, T } from "../lib/LangContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate as useNav } from "react-router-dom";
 
 
 const SCORE_COLORS = ["#AD281F", "#C38322", "#2A7A5A"];
 const CRITERIA_KEYS = ["authenticity", "originality", "impact"];
 
-
-function seededNum(str, min, max) {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) % 9973;
-  return min + (h % (max - min));
-}
-
-
-function getProviderScores(providerId) {
-  // Simulate: ~30% of providers don't have ratings yet
-  const hasRatings = seededNum(providerId + "hasratings", 0, 10) > 2;
-  if (!hasRatings) return null;
-  return CRITERIA_KEYS.map((k, i) => ({
-    score: seededNum(providerId + k, 62, 97),
-    color: SCORE_COLORS[i]
-  }));
-}
 
 
 export default function Series() {
@@ -38,7 +22,11 @@ export default function Series() {
 
   const suyu = SUYUS.find((s) => s.series.some((sr) => sr.name === decoded));
   const series = suyu?.series.find((sr) => sr.name === decoded);
-  const providers = suyu ? getProvidersForSeries(decoded, suyu.id) : [];
+
+  // Load real + demo providers from Supabase hook
+  const { data: providers = [], isLoading: loadingProviders } = useProvidersForSeries(decoded);
+  const realProviders = providers.filter(p => !p.is_demo);
+  const demoProviders = providers.filter(p => p.is_demo);
 
   if (!series) {
     return (
@@ -48,13 +36,8 @@ export default function Series() {
     );
   }
 
-  // Use real series-specific questions from the first provider's episodes
-  const episodeQuestions = providers[0]?.episodes?.map(ep => ep.title) || [
-    "¿Cómo llegaste hasta aquí?",
-    "¿Cuál es tu secreto en Cusco?",
-    "¿Qué hace único tu trabajo?",
-    "¿Qué mensaje dejas al mundo?"
-  ];
+  // Use series-specific episode questions
+  const episodeQuestions = getQuestionsForSeries(decoded);
 
   return (
     <div className="min-h-screen bg-background">
@@ -131,41 +114,91 @@ export default function Series() {
           </div>
 
 
-          {/* Providers gallery — 4 per series */}
+          {/* Providers gallery */}
           <div className="mt-10">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">{t.protagonists}</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {providers.map((p) => {
-                const scores = getProviderScores(p.id);
-                return (
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t.protagonists}</h2>
+              <Link
+                to="/create-provider-profile"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+              >
+                <PlusCircle className="h-3.5 w-3.5" />
+                {lang === "es" ? "Proponer esta experiencia" : "Offer this experience"}
+              </Link>
+            </div>
+
+            {loadingProviders ? (
+              <div className="flex justify-center py-10">
+                <div className="w-6 h-6 border-4 border-border border-t-primary rounded-full animate-spin" />
+              </div>
+            ) : realProviders.length === 0 && demoProviders.length === 0 ? (
+              // Empty state
+              <div className="text-center py-12 border-2 border-dashed border-border rounded-2xl">
+                <p className="text-2xl mb-3">🎭</p>
+                <p className="font-semibold text-foreground text-sm mb-1">
+                  {lang === "es" ? "¡Sé el primero en esta serie!" : "Be the first in this series!"}
+                </p>
+                <p className="text-xs text-muted-foreground mb-4 max-w-xs mx-auto">
+                  {lang === "es"
+                    ? "Nadie ha propuesto aún una experiencia en esta temática. ¿Te animas?"
+                    : "No one has offered an experience in this theme yet. Ready to start?"}
+                </p>
+                <Link
+                  to="/create-provider-profile"
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold bg-primary text-primary-foreground px-4 py-2 rounded-full hover:bg-primary/90 transition-colors"
+                >
+                  <PlusCircle className="h-4 w-4" />
+                  {lang === "es" ? "Crear mi perfil" : "Create my profile"}
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {/* Real providers first */}
+                {realProviders.map((p) => (
                   <Link key={p.id} to={`/provider/${p.id}`} className="group">
                     <div className="relative aspect-[2/3] rounded-xl overflow-hidden shadow-md transition-all duration-200 group-hover:scale-[1.03] group-hover:shadow-xl">
                       <img
                         src={p.poster_url}
-                        alt={p.name}
+                        alt={p.display_name}
                         className="absolute inset-0 w-full h-full object-cover"
                         loading="lazy"
                         onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&h=900&fit=crop"; }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent" />
-                      {scores && (
-                        <div className="absolute bottom-12 right-3 flex flex-col items-end gap-1">
-                          {scores.map((s, i) => (
-                            <span key={i} className="text-xl font-black leading-none" style={{ color: s.color, textShadow: "0 1px 6px rgba(0,0,0,0.9)" }}>
-                              {s.score}
-                            </span>
-                          ))}
-                        </div>
-                      )}
                       <div className="absolute bottom-0 left-0 right-0 p-3">
-                        <p className="text-white font-bold text-lg leading-none">{p.name}</p>
+                        <p className="text-white font-bold text-lg leading-none">{p.display_name}</p>
                         <p className="text-white/70 text-xs mt-1 line-clamp-2">{p.tagline}</p>
                       </div>
                     </div>
                   </Link>
-                );
-              })}
-            </div>
+                ))}
+
+                {/* Demo providers — with badge */}
+                {demoProviders.map((p) => (
+                  <Link key={p.id} to={`/provider/${p.id}`} className="group">
+                    <div className="relative aspect-[2/3] rounded-xl overflow-hidden shadow-md transition-all duration-200 group-hover:scale-[1.03] group-hover:shadow-xl">
+                      <img
+                        src={p.poster_url}
+                        alt={p.display_name}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        loading="lazy"
+                        onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&h=900&fit=crop"; }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent" />
+                      <div className="absolute top-2 left-2">
+                        <span className="inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 bg-violet-600/90 text-white rounded-full">
+                          <FlaskConical className="h-2.5 w-2.5" /> DÉMO
+                        </span>
+                      </div>
+                      <div className="absolute bottom-0 left-0 right-0 p-3">
+                        <p className="text-white font-bold text-lg leading-none">{p.display_name}</p>
+                        <p className="text-white/70 text-xs mt-1 line-clamp-2">{p.tagline}</p>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </main>

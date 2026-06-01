@@ -92,8 +92,8 @@ export default function Header() {
                 <Link to="/my-reservations" className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">
                   {lang === "es" ? "Mis Reservas" : "Orders"}
                 </Link>
-                <Link to="#" className="text-sm font-bold text-primary hover:text-primary/80 transition-colors">
-                  {isProvider ? (lang === "es" ? "Modo Explorador" : "Switch to Buying") : (lang === "es" ? "Devenir Prestataire" : "Switch to Selling")}
+                <Link to="/create-provider-profile" className="text-sm font-bold text-primary hover:text-primary/80 transition-colors">
+                  {lang === "es" ? "Devenir Prestataire" : "Become Provider"}
                 </Link>
               </div>
 
